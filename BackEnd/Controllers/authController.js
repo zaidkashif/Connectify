@@ -208,7 +208,8 @@ exports.deleteAccount = async (req, res) => {
         const activityLog = new ActivityLog({
             userId: userId,
             action: 'deleted user',
-            details: `User with ID ${email} was deleted.`
+            details: `User with email ${user.email} was deleted.`
+
         });
         await activityLog.save();
 

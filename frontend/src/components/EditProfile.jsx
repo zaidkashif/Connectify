@@ -78,72 +78,95 @@ const EditProfile = () => {
   };
 
   if (loading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="spinner-border text-blue-500" role="status"></div>
+      </div>
+    );
   }
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <form onSubmit={handleUpdateProfile} className="bg-white shadow-md rounded-lg p-4">
-        {/* Username */}
-        <div className="mb-4">
-          <label htmlFor="username" className="block text-gray-700 font-bold mb-2">
-            Username
-          </label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-            required
-          />
+      <div className="max-w-lg mx-auto bg-white p-6 rounded-lg shadow-lg">
+        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Edit Your Profile</h2>
+        <form onSubmit={handleUpdateProfile} className="space-y-6">
+          {/* Username */}
+          <div>
+            <label htmlFor="username" className="block text-gray-700 text-sm font-medium">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* Email */}
+          <div>
+            <label htmlFor="email" className="block text-gray-700 text-sm font-medium">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 mt-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+              required
+            />
+          </div>
+
+          {/* Profile Picture */}
+          <div>
+            <label htmlFor="profilePicture" className="block text-gray-700 text-sm font-medium">Profile Picture</label>
+            <div className="mt-2">
+              <input
+                type="file"
+                id="profilePicture"
+                onChange={(e) => setProfilePicture(e.target.files[0])}
+                className="w-full p-3 border border-gray-300 rounded-lg cursor-pointer hover:bg-gray-100"
+              />
+              {profilePicture && (
+                <div className="mt-4">
+                  <img
+                    src={URL.createObjectURL(profilePicture)}
+                    alt="Profile Preview"
+                    className="w-24 h-24 rounded-full object-cover border-2 border-gray-300"
+                  />
+                </div>
+              )}
+            </div>
+          </div>
+
+          {/* Update Button */}
+          <div className="flex justify-center">
+            <button
+              type="submit"
+              className="w-full py-3 mt-4 bg-blue-500 text-white font-semibold rounded-lg shadow-md hover:bg-blue-600 transition"
+            >
+              Update Profile
+            </button>
+          </div>
+        </form>
+
+        <div className="mt-6 flex justify-between">
+          {/* Delete Account Button */}
+          <button
+            type="button"
+            onClick={handleDeleteAccount}
+            className="py-3 px-6 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-red-600 transition"
+          >
+            Delete Account
+          </button>
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="py-3 px-6 bg-gray-300 text-gray-800 font-semibold rounded-lg shadow-md hover:bg-gray-400 transition"
+          >
+            Cancel
+          </button>
         </div>
-
-        {/* Email */}
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 font-bold mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-            required
-          />
-        </div>
-
-        {/* Profile Picture */}
-        <div className="mb-4">
-          <label htmlFor="profilePicture" className="block text-gray-700 font-bold mb-2">
-            Profile Picture
-          </label>
-          <input
-            type="file"
-            id="profilePicture"
-            onChange={(e) => setProfilePicture(e.target.files[0])}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700"
-          />
-        </div>
-
-        {/* Update Button */}
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Update Profile
-        </button>
-
-        {/* Delete Button */}
-        <button
-          type="button"
-          onClick={handleDeleteAccount}
-          className="ml-4 bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded"
-        >
-          Delete Account
-        </button>
-      </form>
+      </div>
     </div>
   );
 };

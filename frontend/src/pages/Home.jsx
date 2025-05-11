@@ -52,28 +52,6 @@
               Share your moments. Follow friends. Explore stories.
             </p>
 
-            {/* Button section */}
-            <div className="flex flex-col md:flex-row justify-center items-center gap-4 mb-12">
-              <button
-                onClick={() => navigate('/create-post')}
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-lg shadow"
-              >
-                Create Post
-              </button>
-              <button
-                onClick={() => navigate('/edit-profile')}
-                className="bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-6 rounded-lg shadow"
-              >
-                Edit Profile
-              </button>
-              <button
-                onClick={() => navigate('/search')}
-                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold py-2 px-6 rounded-lg shadow"
-              >
-                Search Profiles
-              </button>
-            </div>
-
 
             {/* Post Feed */}
             <div className="max-w-3xl mx-auto space-y-8">

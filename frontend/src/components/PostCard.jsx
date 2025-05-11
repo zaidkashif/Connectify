@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 import api from '../services/api';
 
-const PostCard = ({ post, key, onPostUpdated }) => {
+const PostCard = ({ post, key, onPostUpdated, userhe }) => {
     const [commentText, setCommentText] = useState('');
     const [isLiked, setIsLiked] = useState(false);
     const [isEditing, setIsEditing] = useState(false);
@@ -10,7 +9,6 @@ const PostCard = ({ post, key, onPostUpdated }) => {
 
     const user = JSON.parse(localStorage.getItem('user'));
     const userId = user ? user.id : null;
-    const viewerId = user ? user.id : null;
 
     let isOwner = false;
     if (post.user?._id === undefined) {
@@ -18,8 +16,12 @@ const PostCard = ({ post, key, onPostUpdated }) => {
             isOwner = true;
         }
     }
-    console.log("post", post);
-    console.log("post media", post.media);
+
+    const [comments, setComments] = useState([]);
+
+    useEffect(() => {
+        setComments(post.comments || []);
+    }, [post.comments]);
 
     useEffect(() => {
         if (Array.isArray(post.likes) && userId) {
@@ -47,10 +49,18 @@ const PostCard = ({ post, key, onPostUpdated }) => {
         if (!commentText.trim()) return;
 
         try {
-            await api.post(`/users/${userId}/posts/${post._id}/comment`, {
+            const response = await api.post(`/users/${userId}/posts/${post._id}/comment`, {
                 text: commentText,
                 username: user.username,
             });
+
+            const newComment = response.data.comment || {
+                text: commentText,
+                username: user.username,
+                _id: new Date().toISOString(),
+            };
+
+            setComments((prev) => [...prev, newComment]);
             setCommentText('');
             onPostUpdated();
         } catch (err) {
@@ -82,103 +92,105 @@ const PostCard = ({ post, key, onPostUpdated }) => {
     };
 
     return (
-
-        <div className="bg-white shadow rounded-xl p-6 border border-gray-200 mb-4">
-            <div className="flex items-center mb-4">
+        <div className="bg-white rounded-xl shadow-lg transition-all hover:shadow-2xl hover:scale-105 transform duration-300 p-6 mb-6 max-w-2xl mx-auto">
+            <div className="flex items-center space-x-4 mb-4">
                 <img
                     src={
                         post.user?.profilePicture
                             ? `http://localhost:5000/${post.user.profilePicture}`
-                            : '/default-avatar.png'
+                            : `http://localhost:5000/${userhe?.profilePicture}`
                     }
                     alt="Profile"
-                    className="w-10 h-10 rounded-full object-cover mr-3 border"
+                    className="w-12 h-12 rounded-full object-cover"
                 />
                 <div>
-                    <p className="font-semibold text-gray-800">{post.user?.username || 'Unknown User'}</p>
+                    <p className="font-semibold text-lg">{post.user?.username || user?.username}</p>
                     <p className="text-xs text-gray-500">{new Date(post.createdAt).toLocaleString()}</p>
                 </div>
             </div>
+
             {post.media && (
                 <img
                     src={`http://localhost:5000/${post.media}`}
                     alt={post.title || 'Post Image'}
-                    className="w-full h-64 object-cover rounded mb-4"
+                    className="w-full h-80 object-cover rounded-xl mb-4"
                 />
             )}
-
-
-            <div className="mb-4">
-                <h2 className="text-xl font-bold">{post.title}</h2>
-                <p className="text-sm text-gray-500">{new Date(post.createdAt).toLocaleString()}</p>
-            </div>
 
             {isEditing ? (
                 <div className="mb-4">
                     <textarea
-                        className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                        className="w-full p-4 border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
                         value={updatedDescription}
                         onChange={(e) => setUpdatedDescription(e.target.value)}
                     />
                     <button
                         onClick={handleUpdate}
-                        className="mt-2 text-green-600 hover:text-green-800 font-semibold"
+                        className="mt-2 px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
                     >
-                        Save
+                        Save Changes
                     </button>
                 </div>
             ) : (
-                <p className="text-gray-700 mb-4">{post.description}</p>
+                <p className="text-gray-800 text-lg mb-4">{post.description}</p>
             )}
 
             {isOwner && (
-                <div className="flex gap-4 mb-2">
+                <div className="flex gap-6 mb-4">
                     <button
                         onClick={() => setIsEditing(true)}
-                        className="text-yellow-600 hover:text-yellow-800 font-semibold"
+                        className="text-blue-500 hover:text-blue-600 font-medium transition duration-200"
                     >
-                        Edit
+                        ✏️ Edit
                     </button>
                     <button
                         onClick={handleDelete}
-                        className="text-red-600 hover:text-red-800 font-semibold"
+                        className="text-red-500 hover:text-red-600 font-medium transition duration-200"
                     >
-                        Delete
+                        🗑 Delete
                     </button>
                 </div>
             )}
 
-            <div className="flex items-center gap-4 mb-2">
+            <div className="flex items-center gap-6 mb-6">
                 <button
                     onClick={handleLike}
-                    className={`font-semibold ${isLiked ? 'text-red-600 hover:text-red-800' : 'text-blue-600 hover:text-blue-800'}`}
+                    className={`px-4 py-2 rounded-full font-medium transition duration-300 ${
+                        isLiked
+                            ? 'bg-red-100 text-red-600 hover:bg-red-200'
+                            : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
+                    }`}
                 >
-                    {isLiked ? 'Unlike' : 'Like'} ({post.likes.length})
+                    {isLiked ? '❤️ Unlike' : '👍 Like'} ({post.likes.length})
                 </button>
             </div>
 
-            <form onSubmit={handleComment} className="mb-4">
+            <form onSubmit={handleComment} className="flex gap-4 mb-4">
                 <input
                     type="text"
                     value={commentText}
                     onChange={(e) => setCommentText(e.target.value)}
                     placeholder="Add a comment..."
-                    className="w-full border border-gray-300 rounded px-3 py-2 text-sm"
+                    className="w-full p-3 border border-gray-300 rounded-lg text-sm"
                 />
-                <button type="submit" className="text-blue-600 hover:text-blue-800 font-semibold">
+                <button
+                    type="submit"
+                    className="px-4 py-2 rounded-full bg-blue-500 text-white hover:bg-blue-600 transition duration-300"
+                >
                     Comment
                 </button>
             </form>
 
-            <div className="space-y-2">
-                {Array.isArray(post.comments) && post.comments.length > 0 ? (
-                    post.comments.map((comment) => (
-                        <div key={comment._id} className="text-sm text-gray-600">
-                            <strong>{comment.user?.username || 'Anonymous'}:</strong> {comment.text}
+            <div className="space-y-4">
+                {comments.length > 0 ? (
+                    comments.map((comment, index) => (
+                        <div key={comment._id || index} className="flex items-center gap-2 bg-gray-100 p-4 rounded-lg">
+                            <p className="font-semibold text-sm">{comment.username || user.username}:</p>
+                            <p className="text-sm text-gray-600">{comment.text}</p>
                         </div>
                     ))
                 ) : (
-                    <p className="text-sm text-gray-400">No comments yet</p>
+                    <p className="text-sm text-gray-400">No comments yet...</p>
                 )}
             </div>
         </div>

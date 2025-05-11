@@ -11,10 +11,13 @@ after signup send email that user is successfully registered
 google maps
 activity log user ko option de dein ge ke bhai teri sari recent history of usage hmare pass hai (pdf generation)
 dynamic chart addition 
-
-==================================================================================================
-user feed  done like or comment ka issue a ra ---
 aik frontend page jisse login signup accessible history
+user profile if clicked goes to it's profile
+user feed  done like or comment ka issue a ra ---
+
+comment ke bad reload
+==================================================================================================
+
 
 
 

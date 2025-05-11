@@ -91,6 +91,7 @@ const UserProfile = () => {
                   post={post}
                   viewerId={viewerId}
                   onPostUpdated={fetchUser}
+                  userhe={userData}
                 />
               ))
             ) : (

@@ -7,14 +7,14 @@ const { sendRegistrationEmail, sendAccountDeletionEmail, sendOTPEmail } = requir
 console.log(sendRegistrationEmail);
 const ActivityLog = require('../Models/activityLog');
 
-const JWT_SECRET = process.env.JWT_SECRET || "THESECRECTKEY"; // Keep secret in .env
+const JWT_SECRET = process.env.JWT_SECRET || "THESECRECTKEY";
 exports.sendotp = async (req, res) => {
     const { email } = req.body;
     console.log('sendotp called with email:', email);
     if (!email) return res.status(400).json({ message: 'Email is required' });
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+    const otpExpiry = Date.now() + 10 * 60 * 1000;
 
     console.log('Generated OTP:', otp);
     console.log('OTP Expiry:', otpExpiry);
@@ -47,6 +47,7 @@ exports.sendotp = async (req, res) => {
     }
 };
 
+// Verify OTP
 exports.verifyotp = async (req, res) => {
     const { email, otp } = req.body;
 
@@ -61,7 +62,6 @@ exports.verifyotp = async (req, res) => {
         return res.status(400).json({ message: 'OTP has expired' });
     }
 
-    // Optional: clear OTP fields after successful verification
     user.otp = null;
     user.otpExpiry = null;
     await user.save();
@@ -77,14 +77,11 @@ exports.resetPassword = async (req, res) => {
         const user = await User.findOne({ email });
         if (!user) return res.status(404).json({ message: 'User not found' });
 
-        // Optional: Check if OTP was verified or is still valid — or make sure to reset only after verifyOtp route is called
-
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         user.password = hashedPassword;
 
-        // Cleanup
         user.otp = null;
         user.otpExpiry = null;
 
@@ -187,22 +184,20 @@ exports.deleteAccount = async (req, res) => {
     }
 
     try {
-        // Find the user first to get the email and name
+
         const user = await User.findById(userId);
 
         if (!user) {
             return res.status(404).json({ error: "User not found" });
         }
 
-        // Delete the user
         await User.findByIdAndDelete(userId);
 
         console.log(`User with ID ${userId} deleted`);
         console.log(`User's email: ${user.email}`);
         console.log(`User's name: ${user.name}`);
 
-        // Ensure that the name is passed to the sendAccountDeletionEmail function
-        await sendAccountDeletionEmail(user.email, user.name);  // Pass the user's name here
+        await sendAccountDeletionEmail(user.email, user.name);
 
 
         const activityLog = new ActivityLog({
@@ -213,8 +208,6 @@ exports.deleteAccount = async (req, res) => {
         });
         await activityLog.save();
 
-
-        // Respond after email is sent
         res.status(200).json({ message: "Account deleted successfully, and confirmation email sent" });
 
     } catch (error) {

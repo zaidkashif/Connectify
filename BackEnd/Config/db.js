@@ -3,7 +3,7 @@ const dotenv = require('dotenv');
 
 dotenv.config();
 
-mongoose.set('strictQuery', true); // to remove the warning
+mongoose.set('strictQuery', true);
 
 const connectDB = async () => {
   try {

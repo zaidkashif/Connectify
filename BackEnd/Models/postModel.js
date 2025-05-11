@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const postSchema = new mongoose.Schema({
     user: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     description: { type: String, default: '' },
-    media: { type: String, default: '' }, // URL to the media (image or video)
+    media: { type: String, default: '' },
 
     comments: [
         {

@@ -155,11 +155,10 @@ const PostCard = ({ post, key, onPostUpdated, userhe }) => {
             <div className="flex items-center gap-6 mb-6">
                 <button
                     onClick={handleLike}
-                    className={`px-4 py-2 rounded-full font-medium transition duration-300 ${
-                        isLiked
+                    className={`px-4 py-2 rounded-full font-medium transition duration-300 ${isLiked
                             ? 'bg-red-100 text-red-600 hover:bg-red-200'
                             : 'bg-blue-100 text-blue-600 hover:bg-blue-200'
-                    }`}
+                        }`}
                 >
                     {isLiked ? '❤️ Unlike' : '👍 Like'} ({post.likes.length})
                 </button>

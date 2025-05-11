@@ -13,8 +13,8 @@ router.delete('/:id', userController.deleteUser);
 // Post routes
 router.post('/:id/posts', upload.single('media'), userController.createPost);
 router.get('/:id/posts/:postId', userController.getPost);
-router.get('/:id/feed/posts',  userController.getFeedPosts);
-router.put('/:id/posts/:postId/update',upload.none(), userController.updatePost);
+router.get('/:id/feed/posts', userController.getFeedPosts);
+router.put('/:id/posts/:postId/update', upload.none(), userController.updatePost);
 router.delete('/:id/posts/:postId/delete', userController.deletePost);
 router.post('/:id/posts/:postId/like', userController.likePost);
 router.post('/:id/posts/:postId/unlike', userController.unlikePost);

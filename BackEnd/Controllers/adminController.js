@@ -41,7 +41,6 @@ exports.getAllUsers = async (req, res) => {
     }
 };
 
-// GET /api/admin/activity-summary
 exports.getActivitySummary = async (req, res) => {
     try {
         const logs = await ActivityLog.aggregate([
@@ -68,18 +67,15 @@ exports.getActivitySummary = async (req, res) => {
 exports.adminLogin = async (req, res) => {
     const { email, password } = req.body;
 
-    // Check if email and password are provided
     if (!email || !password) {
         return res.status(400).json({ error: "Email and password required" });
     }
 
-    // Hardcoded admin credentials
     const ADMIN_EMAIL = 'admin@gmail.com';
     const ADMIN_PASSWORD = 'admin';
 
-    // Check if the provided credentials match the hardcoded admin credentials
     if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
-        // Generate a JWT token for the admin
+
         const token = jwt.sign({ id: 'admin', role: 'admin' }, process.env.JWT_SECRET, { expiresIn: '7d' });
 
         return res.status(200).json({

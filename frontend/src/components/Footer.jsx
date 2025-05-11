@@ -5,12 +5,12 @@ const Footer = () => {
   return (
     <footer className="bg-gradient-to-r from-blue-600 to-purple-700 text-white py-16 mt-16">
       <div className="container mx-auto px-6 md:px-12 flex flex-col md:flex-row items-center justify-between gap-12">
-        
+
         {/* Left Section */}
         <div className="text-center md:text-left space-y-6 md:space-y-4">
           <h3 className="text-3xl font-extrabold text-white mb-2">Connectify</h3>
           <p className="text-lg mb-6 md:mb-4">Connecting people, creating moments. Join the conversation and share your world.</p>
-          
+
           <div className="flex space-x-6 justify-center md:justify-start mb-6">
             <a
               href="https://www.instagram.com"

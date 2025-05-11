@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import api from '../services/api';
-import { useAuth } from '../Context/AuthContext'; // Assuming you're using useAuth to get user info
+import { useAuth } from '../Context/AuthContext';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 
 const LocationSelector = ({ setLocation }) => {
@@ -22,12 +22,12 @@ const CreatePost = () => {
   const [mentions, setMentions] = useState('');
   const [location, setLocation] = useState(null);
 
-  const { user } = useAuth(); // Get the logged-in user
+  const { user } = useAuth();
 
   const handleCreatePost = async (e) => {
     e.preventDefault();
 
-    console.log(user); // Debugging line to check user info
+    console.log(user);
     if (!user) {
       alert('User not logged in.');
       return;
@@ -42,7 +42,6 @@ const CreatePost = () => {
       formData.append('location[lng]', location.lng);
     }
 
-    // Convert comma-separated mentions to an array of user IDs
     const mentionList = mentions
       .split(',')
       .map(id => id.trim())

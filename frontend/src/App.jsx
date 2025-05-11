@@ -10,8 +10,8 @@ import Search from './pages/Search';
 import EditProfile from './pages/EditProfile';
 import CreatePost from './pages/CreatePost';
 import PrivateRoute from './components/PrivateRoute';
-import ForgotPassword from './components/ForgotPassword'; // ✅ import your component
-import './index.css'; // ✅ import your global styles
+import ForgotPassword from './components/ForgotPassword';
+import './index.css';
 import 'leaflet/dist/leaflet.css';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminLogin from './pages/AdminLogin';
@@ -19,7 +19,7 @@ import AdminLogin from './pages/AdminLogin';
 
 const App = () => {
   return (
-    <AuthProvider> {/* ✅ Context provider wraps everything */}
+    <AuthProvider>
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />

@@ -6,6 +6,7 @@ const ActivityLog = require('../Models/activityLog');
 
 const mongoose = require('mongoose');
 
+// get User
 exports.getUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id).populate('posts').populate('followers').populate('following');
@@ -25,25 +26,23 @@ exports.getUser = async (req, res) => {
     }
 };
 
+// Update User
 exports.updateUser = async (req, res) => {
     try {
         console.log('req.file:', req.file);
         console.log('req.body:', req.body);
         const userId = req.params.id;
 
-        // Check if a profile picture is uploaded
         let profilePicturePath = null;
         if (req.file) {
             profilePicturePath = req.file.path;
         }
 
-        // Prepare the update object
         const updateData = {};
         if (req.body.username) updateData.username = req.body.username;
         if (req.body.email) updateData.email = req.body.email;
         if (profilePicturePath) updateData.profilePicture = profilePicturePath;
 
-        // Update the user
         const updatedUser = await User.findByIdAndUpdate(userId, updateData, { new: true });
 
         if (!updatedUser) {
@@ -56,14 +55,13 @@ exports.updateUser = async (req, res) => {
             details: `User with ID ${req.params.id} was updated.`
         });
         await activityLog.save();
-
-        // Send a success response with the updated user data
         res.status(200).json(updatedUser);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
 
+// Delete User
 exports.deleteUser = async (req, res) => {
     try {
         await User.findByIdAndDelete(req.params.id);
@@ -73,6 +71,7 @@ exports.deleteUser = async (req, res) => {
     }
 };
 
+// Create Post
 exports.createPost = async (req, res) => {
     try {
         const { description, mentions, lat, lng } = req.body;
@@ -103,7 +102,7 @@ exports.createPost = async (req, res) => {
 };
 
 
-// Controller
+// get all posts
 exports.getFeedPosts = async (req, res) => {
     try {
         console.log("User ID:", req.params.id);
@@ -132,7 +131,7 @@ exports.getFeedPosts = async (req, res) => {
     }
 };
 
-
+// Get User Posts
 exports.getPost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.postId)
@@ -151,26 +150,24 @@ exports.getPost = async (req, res) => {
     }
 };
 
+// update post
 exports.updatePost = async (req, res) => {
     try {
         const userId = req.params.id;
         const postId = req.params.postId;
         console.log("req.body:", req.body);
 
-        // Confirm ownership
         const user = await User.findOne({ _id: userId, posts: postId });
         if (!user) {
             return res.status(403).json({ error: 'Unauthorized: You can only update your own posts' });
         }
 
-        // Extract and sanitize input
         const { description } = req.body;
         let { mentions } = req.body;
 
-        console.log('Mentions:', mentions); // Debugging line
-        console.log('Description:', description); // Debugging line
+        console.log('Mentions:', mentions);
+        console.log('Description:', description);
 
-        // Parse mentions if provided as JSON string
         if (mentions !== undefined) {
             if (typeof mentions === 'string') {
                 try {
@@ -184,7 +181,6 @@ exports.updatePost = async (req, res) => {
             }
         }
 
-        // Build update object
         const updateData = {};
         if (description !== undefined) updateData.description = description;
         if (mentions !== undefined && mentions.length > 0) {
@@ -199,7 +195,6 @@ exports.updatePost = async (req, res) => {
             });
         }
 
-        // Update the post
         const updatedPost = await Post.findByIdAndUpdate(postId, updateData, { new: true });
         if (!updatedPost) {
             return res.status(404).json({ error: 'Post not found' });
@@ -219,6 +214,7 @@ exports.updatePost = async (req, res) => {
     }
 };
 
+// Delete Post
 exports.deletePost = async (req, res) => {
     const userId = req.params.id;
     const postId = req.params.postId;
@@ -242,6 +238,7 @@ exports.deletePost = async (req, res) => {
     }
 };
 
+// Like Post
 exports.likePost = async (req, res) => {
     try {
         console.log("Like Post Request Body:", req.body);
@@ -262,6 +259,7 @@ exports.likePost = async (req, res) => {
     }
 };
 
+// Unlike Post
 exports.unlikePost = async (req, res) => {
     try {
         console.log("unLike Post Request Body:", req.body);
@@ -284,6 +282,7 @@ exports.unlikePost = async (req, res) => {
     }
 };
 
+// Follow User
 exports.followUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -314,6 +313,7 @@ exports.followUser = async (req, res) => {
 };
 
 
+//search users
 exports.searchUsers = async (req, res) => {
     try {
         const query = req.query.q;
@@ -330,6 +330,7 @@ exports.searchUsers = async (req, res) => {
     }
 };
 
+// unfollow user
 exports.unfollowUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -359,6 +360,7 @@ exports.unfollowUser = async (req, res) => {
     }
 };
 
+// Comment on Post
 exports.commentOnPost = async (req, res) => {
     try {
         const { text } = req.body;
@@ -381,7 +383,6 @@ exports.commentOnPost = async (req, res) => {
         post.comments.push(newComment);
         await post.save();
 
-        // ✅ Re-fetch to get fully populated post including the new comment's user
         const updatedPost = await Post.findById(post._id)
             .populate('user', 'username profilePicture')
             .populate('comments.user', 'username')

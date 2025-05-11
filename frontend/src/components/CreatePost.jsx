@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../Context/AuthContext';
+import axios from 'axios';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 
 const LocationSelector = ({ setLocation }) => {
@@ -57,7 +58,7 @@ const CreatePost = () => {
         media,
         mentions: mentionList,
       });
-      await api.post(`/users/${user.id}/posts`, formData, {
+      await axios.post(`http://localhost:5001/api/users/${user.id}/posts`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },

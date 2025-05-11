@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../Context/AuthContext';
 import api from '../services/api';
+import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 
 const EditProfile = () => {
@@ -14,7 +15,7 @@ const EditProfile = () => {
   useEffect(() => {
     const fetchUserProfile = async () => {
       try {
-        const response = await api.get(`/users/${user.id}`);
+        const response = await axios.get(`http://localhost:5001/api/users/${user.id}`);
         setUsername(response.data.username);
         setEmail(response.data.email);
       } catch (error) {
@@ -39,7 +40,7 @@ const EditProfile = () => {
     }
 
     try {
-      const response = await api.put(`/users/${user.id}`, formData, {
+      const response = await axios.put(`http://localhost:5001/api/users/${user.id}`, formData, {
         headers: {
           'Content-Type': 'multipart/form-data',
         },
@@ -59,7 +60,7 @@ const EditProfile = () => {
   const handleDeleteAccount = async () => {
     if (window.confirm('Are you sure you want to delete your account? This action cannot be undone.')) {
       try {
-        const response = await api.delete('/auth/delete', {
+        const response = await axios.delete('http://localhost:5002/api/auth/delete', {
           data: { userId: user.id },
         });
 

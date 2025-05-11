@@ -4,6 +4,7 @@ import Footer from '../components/Footer';
 import Post from '../components/Post';
 import CreatePost from '../components/CreatePost';
 import api from '../services/api';
+import axios from 'axios';
 
 const Feed = () => {
   const [posts, setPosts] = useState([]);
@@ -11,7 +12,7 @@ const Feed = () => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await api.get('/posts');
+        const response = await axios.get('http://localhost:5001/api/users/posts');
         setPosts(response.data);
       } catch (error) {
         console.error(error);

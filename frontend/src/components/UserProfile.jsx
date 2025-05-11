@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import api from '../services/api';
 import { useParams } from 'react-router-dom';
 import PostCard from '../components/PostCard';
+import axios from 'axios';
 
 const UserProfile = () => {
   const [userData, setUserData] = useState(null);
@@ -19,7 +20,7 @@ const UserProfile = () => {
 
   const fetchUser = async () => {
     try {
-      const response = await api.get(`/users/${profileId}`);
+      const response = await axios.get(`http://localhost:5001/api/users/${profileId}`);
       setUserData(response.data);
       setIsFollowing(response.data.followers.some(f => f._id === viewerId));
     } catch (error) {
@@ -36,7 +37,7 @@ const UserProfile = () => {
 
   const handleFollow = async () => {
     try {
-      await api.put(`/users/${userData._id}/follow`, { userId: viewerId });
+      await axios.put(`http://localhost:5001/api/users/${userData._id}/follow`, { userId: viewerId });
       fetchUser();
     } catch (error) {
       console.error(error);
@@ -45,7 +46,7 @@ const UserProfile = () => {
 
   const handleUnfollow = async () => {
     try {
-      await api.put(`/users/${userData._id}/unfollow`, { userId: viewerId });
+      await axios.put(`http://localhost:5001/api/users/${userData._id}/unfollow`, { userId: viewerId });
       fetchUser();
     } catch (error) {
       console.error(error);
@@ -60,7 +61,7 @@ const UserProfile = () => {
         <div className="flex items-center justify-between">
           <div className="flex items-center">
             <img
-              src={userData.profilePicture ? `http://localhost:5000/${userData.profilePicture}` : 'https://via.placeholder.com/100'}
+              src={userData.profilePicture ? `http://localhost:5001/${userData.profilePicture}` : 'https://via.placeholder.com/100'}
               alt={userData.username}
               className="w-20 h-20 rounded-full mr-4"
             />

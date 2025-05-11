@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import api from '../services/api';
+import axios from 'axios';
 
 const Search = () => {
   const [query, setQuery] = useState('');
@@ -14,7 +15,7 @@ const Search = () => {
       }
 
       try {
-        const response = await api.get(`/users/search/query?q=${query}`);
+        const response = await axios.get(`http://localhost:5001/api/users/users/search/query?q=${query}`);
         setUsers(response.data);
       } catch (error) {
         console.error('Search failed:', error);
@@ -43,7 +44,7 @@ const Search = () => {
             <div key={user._id} className="bg-white shadow-md rounded-lg p-4 mb-4 cursor-pointer">
               <div className="flex items-center">
                 <img
-                  src={`http://localhost:5000/${user.profilePicture}`}
+                  src={`http://localhost:5001/${user.profilePicture}`}
                   alt={user.username}
                   className="w-10 h-10 rounded-full mr-4"
                 />

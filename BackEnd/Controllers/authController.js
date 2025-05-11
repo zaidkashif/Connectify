@@ -1,15 +1,105 @@
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcryptjs');
 const User = require("../Models/userModel");
+const validator = require('validator');
+console.log('userController loaded');
+const { sendRegistrationEmail, sendAccountDeletionEmail, sendOTPEmail } = require('../utility/sendmail');
+console.log(sendRegistrationEmail);
+
 
 const JWT_SECRET = process.env.JWT_SECRET || "THESECRECTKEY"; // Keep secret in .env
+exports.sendotp = async (req, res) => {
+    const { email } = req.body;
+    console.log('sendotp called with email:', email);
+    if (!email) return res.status(400).json({ message: 'Email is required' });
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const otpExpiry = Date.now() + 10 * 60 * 1000; // 10 minutes
+
+    console.log('Generated OTP:', otp);
+    console.log('OTP Expiry:', otpExpiry);
+
+    try {
+        console.log('Finding user with email:', email);
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        console.log('User found:', user._id);
+        user.otp = otp;
+        user.otpExpiry = otpExpiry;
+        await user.save();
+        console.log('OTP saved to user:', user._id);
+
+        await sendOTPEmail(email, otp);
+        res.status(200).json({ message: 'OTP sent to your email' });
+    } catch (error) {
+        console.error('Error sending OTP:', error);
+        res.status(500).json({ message: 'Failed to send OTP' });
+    }
+};
+
+exports.verifyotp = async (req, res) => {
+    const { email, otp } = req.body;
+
+    const user = await User.findOne({ email });
+    if (!user) return res.status(404).json({ message: 'User not found' });
+
+    if (user.otp !== otp) {
+        return res.status(400).json({ message: 'Invalid OTP' });
+    }
+
+    if (Date.now() > user.otpExpiry) {
+        return res.status(400).json({ message: 'OTP has expired' });
+    }
+
+    // Optional: clear OTP fields after successful verification
+    user.otp = null;
+    user.otpExpiry = null;
+    await user.save();
+
+    res.status(200).json({ message: 'OTP verified successfully' });
+};
+
+// Reset Password
+exports.resetPassword = async (req, res) => {
+    const { email, newPassword } = req.body;
+
+    try {
+        const user = await User.findOne({ email });
+        if (!user) return res.status(404).json({ message: 'User not found' });
+
+        // Optional: Check if OTP was verified or is still valid — or make sure to reset only after verifyOtp route is called
+
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+        user.password = hashedPassword;
+
+        // Cleanup
+        user.otp = null;
+        user.otpExpiry = null;
+
+        await user.save();
+
+        res.status(200).json({ message: 'Password reset successful' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Error resetting password' });
+    }
+};
 
 // Register
 exports.register = async (req, res) => {
     const { name, username, email, password } = req.body;
+
     if (!name || !username || !email || !password) {
         return res.status(400).json({ error: "All fields are required" });
     }
+
+    if (!validator.isEmail(email)) {
+        return res.status(400).json({ error: "Invalid email format" });
+    }
+
     try {
         const existingUser = await User.findOne({ $or: [{ email }, { username }] });
         if (existingUser) {
@@ -19,6 +109,7 @@ exports.register = async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
         const user = new User({ name, username, email, password: hashedPassword });
         await user.save();
+        await sendRegistrationEmail(email, name);
 
         res.status(201).json({ message: "User registered successfully", userId: user._id });
     } catch (error) {
@@ -64,13 +155,36 @@ exports.logout = async (req, res) => {
 // Delete Account
 exports.deleteAccount = async (req, res) => {
     const { userId } = req.body;
+
     if (!userId) {
         return res.status(400).json({ error: "User ID is required" });
     }
+
     try {
+        // Find the user first to get the email and name
+        const user = await User.findById(userId);
+
+        if (!user) {
+            return res.status(404).json({ error: "User not found" });
+        }
+
+        // Delete the user
         await User.findByIdAndDelete(userId);
-        res.status(200).json({ message: "Account deleted successfully" });
+
+        console.log(`User with ID ${userId} deleted`);
+        console.log(`User's email: ${user.email}`);
+        console.log(`User's name: ${user.name}`);
+
+        // Ensure that the name is passed to the sendAccountDeletionEmail function
+        await sendAccountDeletionEmail(user.email, user.name);  // Pass the user's name here
+
+        // Respond after email is sent
+        res.status(200).json({ message: "Account deleted successfully, and confirmation email sent" });
+
     } catch (error) {
+        console.error(error);
         res.status(500).json({ error: "Server error" });
     }
 };
+
+

@@ -10,6 +10,7 @@ import Search from './pages/Search';
 import EditProfile from './pages/EditProfile';
 import CreatePost from './pages/CreatePost'; 
 import PrivateRoute from './components/PrivateRoute';
+import ForgotPassword from './components/ForgotPassword'; // ✅ import your component
 import './index.css'; // ✅ import your global styles
 
 const App = () => {
@@ -19,6 +20,7 @@ const App = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/forgot-password" element={<ForgotPassword />} />
 
         {/* Private Routes */}
         <Route path="/feed" element={<PrivateRoute><Feed /></PrivateRoute>} />

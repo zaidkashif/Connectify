@@ -1,21 +1,21 @@
 logout 
 profile picture ez scn 
 authentication done
+google auth
+file upload done        
+search done
+account deletion a mail is sent done
+account creation a mail is sent done from auth too done
 
 ==================================================================================================
-aik frontend page jisse login signup accessible history
 user feed  done like or comment ka issue a ra ---
+aik frontend page jisse login signup accessible history
 
-account deletion // this successfull but we will add email sent that account deleted successfully // left
-google auth
 google maps
 forgot password reset otp through
 activity log user ko option de dein ge ke bhai teri sari recent history of usage hmare pass hai (pdf generation)
 after signup send email that user is successfully registered
 dynamic chart addition 
 
-advance = 
 
-file upload done        
-search done
 

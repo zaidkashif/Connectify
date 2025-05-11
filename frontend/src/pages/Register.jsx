@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../Context/AuthContext';
+import Header from '../components/Header';
 
 const Register = () => {
   const [name, setName] = useState('');
@@ -12,76 +13,104 @@ const Register = () => {
   const { register } = useAuth();
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
-  try {
-    await register(name, username, email, password);
-    console.log('Registration successful');
-    console.log('User:', { name, username, email, password });
-    navigate('/login');
-  } catch (error) {
-    setErrorMsg(error.message);
-  }
-};
+    e.preventDefault();
+    try {
+      await register(name, username, email, password);
+      console.log('Registration successful');
+      navigate('/login');
+    } catch (error) {
+      setErrorMsg(error.message);
+    }
+  };
 
   return (
-    <div>
-      <form onSubmit={handleSubmit} className="max-w-md mx-auto">
-        <div className="mb-4">
-          <label htmlFor="name" className="block text-gray-700 font-bold mb-2">
-            Name
-          </label>
-          <input
-            type="text"
-            id="name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="username" className="block text-gray-700 font-bold mb-2">
-            Username
-          </label>
-          <input
-            type="text"
-            id="username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="email" className="block text-gray-700 font-bold mb-2">
-            Email
-          </label>
-          <input
-            type="email"
-            id="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <div className="mb-4">
-          <label htmlFor="password" className="block text-gray-700 font-bold mb-2">
-            Password
-          </label>
-          <input
-            type="password"
-            id="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-        >
-          Register
-        </button>
-      </form>
+    <>
+    <Header/>
+    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-green-400 to-blue-500">
+      <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
+        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Register</h2>
+
+        {/* Error Message Display */}
+        {errorMsg && <p className="text-red-500 text-center mb-4">{errorMsg}</p>}
+
+        <form onSubmit={handleSubmit}>
+          {/* Name Input */}
+          <div className="mb-5">
+            <label htmlFor="name" className="block text-gray-600 font-medium mb-2">Name</label>
+            <input
+              type="text"
+              id="name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+              placeholder="Enter your full name"
+            />
+          </div>
+
+          {/* Username Input */}
+          <div className="mb-5">
+            <label htmlFor="username" className="block text-gray-600 font-medium mb-2">Username</label>
+            <input
+              type="text"
+              id="username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+              placeholder="Create a username"
+            />
+          </div>
+
+          {/* Email Input */}
+          <div className="mb-5">
+            <label htmlFor="email" className="block text-gray-600 font-medium mb-2">Email</label>
+            <input
+              type="email"
+              id="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+              placeholder="Enter your email"
+            />
+          </div>
+
+          {/* Password Input */}
+          <div className="mb-5">
+            <label htmlFor="password" className="block text-gray-600 font-medium mb-2">Password</label>
+            <input
+              type="password"
+              id="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 transition ease-in-out"
+              placeholder="Create a password"
+            />
+          </div>
+
+          {/* Register Button */}
+          <button
+            type="submit"
+            className="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none"
+          >
+            Register
+          </button>
+
+          {/* Already have an account? */}
+          <div className="mt-6 text-center">
+            <p className="text-gray-600">
+              Already have an account?{' '}
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-blue-600 hover:underline font-semibold"
+              >
+                Login
+              </button>
+            </p>
+          </div>
+        </form>
+      </div>
     </div>
+    </>
   );
 };
 

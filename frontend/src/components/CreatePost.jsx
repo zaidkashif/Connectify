@@ -1,11 +1,27 @@
 import React, { useState } from 'react';
 import api from '../services/api';
 import { useAuth } from '../Context/AuthContext'; // Assuming you're using useAuth to get user info
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+
+const LocationSelector = ({ setLocation }) => {
+  useMapEvents({
+    click(e) {
+      setLocation({
+        lat: e.latlng.lat,
+        lng: e.latlng.lng,
+      });
+    },
+  });
+
+  return null;
+};
 
 const CreatePost = () => {
   const [description, setDescription] = useState('');
   const [media, setMedia] = useState(null);
   const [mentions, setMentions] = useState('');
+  const [location, setLocation] = useState(null);
+
   const { user } = useAuth(); // Get the logged-in user
 
   const handleCreatePost = async (e) => {
@@ -20,6 +36,11 @@ const CreatePost = () => {
     const formData = new FormData();
     formData.append('description', description);
     if (media) formData.append('media', media);
+
+    if (location) {
+      formData.append('location[lat]', location.lat);
+      formData.append('location[lng]', location.lng);
+    }
 
     // Convert comma-separated mentions to an array of user IDs
     const mentionList = mentions
@@ -75,6 +96,18 @@ const CreatePost = () => {
         placeholder="Mention user IDs (comma-separated)"
         className="w-full border rounded py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline mb-4"
       />
+      <div className="mb-4">
+        <label className="block text-sm font-medium text-gray-700 mb-1">Select Location (optional)</label>
+        <MapContainer center={[33.6844, 73.0479]} zoom={13} style={{ height: '300px', width: '100%' }}>
+          <TileLayer
+            attribution='&copy; OpenStreetMap contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+          <LocationSelector setLocation={setLocation} />
+          {location && <Marker position={[location.lat, location.lng]} />}
+        </MapContainer>
+      </div>
+
       <button
         type="submit"
         className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"

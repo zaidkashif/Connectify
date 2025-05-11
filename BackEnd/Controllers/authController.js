@@ -5,7 +5,7 @@ const validator = require('validator');
 console.log('userController loaded');
 const { sendRegistrationEmail, sendAccountDeletionEmail, sendOTPEmail } = require('../utility/sendmail');
 console.log(sendRegistrationEmail);
-
+const ActivityLog = require('../Models/activityLog');
 
 const JWT_SECRET = process.env.JWT_SECRET || "THESECRECTKEY"; // Keep secret in .env
 exports.sendotp = async (req, res) => {
@@ -31,6 +31,15 @@ exports.sendotp = async (req, res) => {
         console.log('OTP saved to user:', user._id);
 
         await sendOTPEmail(email, otp);
+
+        const activityLog = new ActivityLog({
+            userId: user._id,
+            action: 'otp sent',
+            details: `User with ID ${req.params.id} was sent OTP.`
+        });
+        console.log('Activity log created:', activityLog);
+        await activityLog.save();
+
         res.status(200).json({ message: 'OTP sent to your email' });
     } catch (error) {
         console.error('Error sending OTP:', error);
@@ -111,6 +120,15 @@ exports.register = async (req, res) => {
         await user.save();
         await sendRegistrationEmail(email, name);
 
+        const activityLog = new ActivityLog({
+            userId: email,
+            action: 'registered user',
+            details: `User with ID ${email} was registered.`
+        });
+        await activityLog.save();
+
+
+
         res.status(201).json({ message: "User registered successfully", userId: user._id });
     } catch (error) {
         console.error(error);
@@ -133,6 +151,13 @@ exports.login = async (req, res) => {
 
         const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "7d" });
 
+        const activityLog = new ActivityLog({
+            userId: email,
+            action: 'login user',
+            details: `User with ID ${email} was logined.`
+        });
+        await activityLog.save();
+
         res.status(200).json({
             message: "Login successful",
             token,
@@ -146,6 +171,7 @@ exports.login = async (req, res) => {
 // Logout
 exports.logout = async (req, res) => {
     try {
+
         res.status(200).json({ message: "Logout successful" });
     } catch (error) {
         res.status(500).json({ error: "Server error" });
@@ -178,6 +204,15 @@ exports.deleteAccount = async (req, res) => {
         // Ensure that the name is passed to the sendAccountDeletionEmail function
         await sendAccountDeletionEmail(user.email, user.name);  // Pass the user's name here
 
+
+        const activityLog = new ActivityLog({
+            userId: userId,
+            action: 'deleted user',
+            details: `User with ID ${email} was deleted.`
+        });
+        await activityLog.save();
+
+
         // Respond after email is sent
         res.status(200).json({ message: "Account deleted successfully, and confirmation email sent" });
 
@@ -186,5 +221,4 @@ exports.deleteAccount = async (req, res) => {
         res.status(500).json({ error: "Server error" });
     }
 };
-
 

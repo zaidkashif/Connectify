@@ -8,10 +8,14 @@ import Feed from './pages/Feed';
 import UserProfile from './pages/UserProfile';
 import Search from './pages/Search';
 import EditProfile from './pages/EditProfile';
-import CreatePost from './pages/CreatePost'; 
+import CreatePost from './pages/CreatePost';
 import PrivateRoute from './components/PrivateRoute';
 import ForgotPassword from './components/ForgotPassword'; // ✅ import your component
 import './index.css'; // ✅ import your global styles
+import 'leaflet/dist/leaflet.css';
+import AdminDashboard from './pages/AdminDashboard';
+import AdminLogin from './pages/AdminLogin';
+
 
 const App = () => {
   return (
@@ -21,13 +25,15 @@ const App = () => {
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<ForgotPassword />} />
+        <Route path="/admin" element={<AdminDashboard />} />
+        <Route path="/admin-login" element={<AdminLogin />} />
 
         {/* Private Routes */}
         <Route path="/feed" element={<PrivateRoute><Feed /></PrivateRoute>} />
         <Route path="/profile/:id" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
         <Route path="/search" element={<PrivateRoute><Search /></PrivateRoute>} />
         <Route path="/edit-profile" element={<PrivateRoute><EditProfile /></PrivateRoute>} />
-        <Route path="/create-post" element={<PrivateRoute><CreatePost /></PrivateRoute>} /> 
+        <Route path="/create-post" element={<PrivateRoute><CreatePost /></PrivateRoute>} />
       </Routes>
     </AuthProvider>
   );

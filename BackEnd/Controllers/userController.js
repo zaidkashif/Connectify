@@ -1,5 +1,8 @@
+const fs = require('fs');
+const path = require('path');
 const User = require('../Models/userModel');
 const Post = require('../Models/postModel');
+const ActivityLog = require('../Models/activityLog');
 
 const mongoose = require('mongoose');
 
@@ -9,26 +12,18 @@ exports.getUser = async (req, res) => {
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
         }
+        const activityLog = new ActivityLog({
+            userId: req.params.id,
+            action: 'getUser',
+            details: `User with ID ${req.params.id} was retrieved.`
+        });
+        await activityLog.save();
+
         res.status(200).json(user);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 };
-
-// exports.updateUser = async (req, res) => {
-//     try {
-//         const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, { new: true });
-//         res.status(200).json(updatedUser);
-//     } catch (error) {
-//         res.status(500).json({ error: error.message });
-//     }
-// };
-
-// Controllers/userController.js
-// const User = require('../Models/userModel');
-// const mongoose = require('mongoose');
-const fs = require('fs');
-const path = require('path');
 
 exports.updateUser = async (req, res) => {
     try {
@@ -55,6 +50,13 @@ exports.updateUser = async (req, res) => {
             return res.status(404).json({ error: 'User not found' });
         }
 
+        const activityLog = new ActivityLog({
+            userId: req.params.id,
+            action: 'updated user',
+            details: `User with ID ${req.params.id} was updated.`
+        });
+        await activityLog.save();
+
         // Send a success response with the updated user data
         res.status(200).json(updatedUser);
     } catch (error) {
@@ -73,7 +75,7 @@ exports.deleteUser = async (req, res) => {
 
 exports.createPost = async (req, res) => {
     try {
-        const { description, mentions } = req.body;
+        const { description, mentions, lat, lng } = req.body;
         const mediaPath = req.file ? req.file.path : null;
 
         const newPost = new Post({
@@ -81,10 +83,18 @@ exports.createPost = async (req, res) => {
             description,
             media: mediaPath,
             mentions: mentions ? mentions.map(userId => mongoose.Types.ObjectId(userId)) : [],
+            location: lat && lng ? { lat: parseFloat(lat), lng: parseFloat(lng) } : undefined,
         });
 
         await newPost.save();
         await User.findByIdAndUpdate(req.params.id, { $push: { posts: newPost._id } });
+
+        const activityLog = new ActivityLog({
+            userId: req.params.id,
+            action: 'Post Created',
+            details: `User with ID ${req.params.id} has Posted.`
+        });
+        await activityLog.save();
 
         res.status(201).json(newPost);
     } catch (error) {
@@ -92,29 +102,37 @@ exports.createPost = async (req, res) => {
     }
 };
 
+
 // Controller
 exports.getFeedPosts = async (req, res) => {
     try {
-    console.log("User ID:", req.params.id);
-    console.log("Request Body:", req.body);
-      const user = await User.findById(req.params.id).populate('following');
-      console.log("User:", user);
-      const followingIds = user.following.map(f => f._id);
-      console.log("Following IDs:", followingIds);
-  
-      const posts = await Post.find({ user: { $in: followingIds } })
-        .sort({ createdAt: -1 })
-        .populate('user')
-        .populate('comments.user' , 'username')
-        .populate('likes');
-  
-      res.status(200).json(posts);
-    } catch (err) {
-      res.status(500).json({ error: err.message });
-    }
-  };
+        console.log("User ID:", req.params.id);
+        console.log("Request Body:", req.body);
+        const user = await User.findById(req.params.id).populate('following');
+        console.log("User:", user);
+        const followingIds = user.following.map(f => f._id);
+        console.log("Following IDs:", followingIds);
 
-  
+        const posts = await Post.find({ user: { $in: followingIds } })
+            .sort({ createdAt: -1 })
+            .populate('user')
+            .populate('comments.user', 'username')
+            .populate('likes');
+
+        const activityLog = new ActivityLog({
+            userId: req.params.id,
+            action: 'feed get',
+            details: `User with ID ${req.params.id} was getting feed.`
+        });
+        await activityLog.save();
+
+        res.status(200).json(posts);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+};
+
+
 exports.getPost = async (req, res) => {
     try {
         const post = await Post.findById(req.params.postId)
@@ -187,15 +205,19 @@ exports.updatePost = async (req, res) => {
             return res.status(404).json({ error: 'Post not found' });
         }
 
+        const activityLog = new ActivityLog({
+            userId: req.params.id,
+            action: 'updated post',
+            details: `User with ID ${req.params.id} has updated post.`
+        });
+        await activityLog.save();
+
         res.status(200).json(updatedPost);
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: error.message });
     }
 };
-
-
-
 
 exports.deletePost = async (req, res) => {
     const userId = req.params.id;
@@ -206,6 +228,14 @@ exports.deletePost = async (req, res) => {
             return res.status(403).json({ error: 'Unauthorized: You can only update your own posts' });
         }
         await Post.findByIdAndDelete(postId);
+
+        const activityLog = new ActivityLog({
+            userId: req.params.id,
+            action: 'deleted post',
+            details: `User with ID ${req.params.id} has deleted post.`
+        });
+        await activityLog.save();
+
         res.status(200).json({ message: 'Post deleted successfully' });
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -215,12 +245,12 @@ exports.deletePost = async (req, res) => {
 exports.likePost = async (req, res) => {
     try {
         console.log("Like Post Request Body:", req.body);
-        const post = await Post.findById(req.params.postId); 
+        const post = await Post.findById(req.params.postId);
         if (!post) {
             return res.status(404).json({ error: "Post not found" });
         }
 
-        const userId = req.params.userId; 
+        const userId = req.params.userId;
         if (!post.likes.includes(userId)) {
             post.likes.push(userId);
             await post.save();
@@ -235,7 +265,7 @@ exports.likePost = async (req, res) => {
 exports.unlikePost = async (req, res) => {
     try {
         console.log("unLike Post Request Body:", req.body);
-        const post = await Post.findById(req.params.postId); 
+        const post = await Post.findById(req.params.postId);
         if (!post) {
             return res.status(404).json({ error: "Post not found" });
         }
@@ -254,10 +284,6 @@ exports.unlikePost = async (req, res) => {
     }
 };
 
-
-
-// In userController.js
-
 exports.followUser = async (req, res) => {
     try {
         const user = await User.findById(req.params.id);
@@ -272,6 +298,12 @@ exports.followUser = async (req, res) => {
             currentUser.following.push(req.params.id);
             await user.save();
             await currentUser.save();
+            const activityLog = new ActivityLog({
+                userId: req.params.id,
+                action: 'followed',
+                details: `User with ID ${req.params.id} was followed.`
+            });
+            await activityLog.save();
             res.status(200).json({ message: "User followed" });
         } else {
             res.status(400).json({ error: "Already following" });
@@ -291,12 +323,12 @@ exports.searchUsers = async (req, res) => {
                 { email: { $regex: query, $options: 'i' } }
             ]
         }).select('username email profilePicture');
+
         res.status(200).json(users);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 };
-
 
 exports.unfollowUser = async (req, res) => {
     try {
@@ -312,6 +344,12 @@ exports.unfollowUser = async (req, res) => {
             currentUser.following.pull(req.params.id);
             await user.save();
             await currentUser.save();
+            const activityLog = new ActivityLog({
+                userId: req.params.id,
+                action: 'unfollowed',
+                details: `User with ID ${req.params.id} was unfollowed.`
+            });
+            await activityLog.save();
             res.status(200).json({ message: "User unfollowed" });
         } else {
             res.status(400).json({ error: "Not following" });
@@ -323,7 +361,7 @@ exports.unfollowUser = async (req, res) => {
 
 exports.commentOnPost = async (req, res) => {
     try {
-        const { text } = req.body; 
+        const { text } = req.body;
         const userId = req.params.userId;
 
         console.log("Comment Request Body:", req.body);
@@ -349,6 +387,12 @@ exports.commentOnPost = async (req, res) => {
             .populate('comments.user', 'username')
             .populate('likes');
 
+        const activityLog = new ActivityLog({
+            userId: req.params.userId,
+            action: 'commented on post',
+            details: `User with ID ${req.params.userId} commented on post with ID ${req.params.postId}.`
+        });
+        await activityLog.save();
         res.status(200).json({ message: "Comment added", post: updatedPost });
     } catch (error) {
         res.status(500).json({ error: error.message });

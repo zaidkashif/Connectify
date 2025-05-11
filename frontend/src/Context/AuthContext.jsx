@@ -9,7 +9,12 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(() => {
     const savedUser = localStorage.getItem('user');
-    return savedUser ? JSON.parse(savedUser) : null;
+    try {
+      return savedUser ? JSON.parse(savedUser) : null;
+    } catch (e) {
+      localStorage.removeItem('user'); // cleanup corrupted entry
+      return null;
+    }
   });
 
   const login = async (email, password) => {
@@ -34,14 +39,14 @@ export const AuthProvider = ({ children }) => {
     try {
       const result = await signInWithPopup(auth, provider);
       const user = result.user;
-  
+
       const userData = {
         name: user.displayName,
         username: user.displayName.replace(/\s+/g, '').toLowerCase(),
         email: user.email,
         password: user.uid.slice(0, 8),
       };
-  
+
       // Try register
       try {
         await axios.post('http://localhost:5000/api/auth/register', userData);
@@ -50,23 +55,23 @@ export const AuthProvider = ({ children }) => {
           throw err;
         }
       }
-  
+
       // Login
       const loginRes = await axios.post('http://localhost:5000/api/auth/login', {
         email: userData.email,
         password: userData.password,
       });
-  
+
       localStorage.setItem('token', loginRes.data.token);
       localStorage.setItem('user', JSON.stringify(loginRes.data.user));
       setUser(loginRes.data.user);
-  
+
       navigate('/');
     } catch (error) {
       console.error('Google Login/Register Error:', error);
     }
   };
-  
+
 
 
 

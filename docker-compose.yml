@@ -1,4 +1,15 @@
 services:
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173" # or whatever port your frontend runs on
+    networks:
+      - connectify-net
+    depends_on:
+      - user-service
+      - admin-service
+      - auth-service
+
   user-service:
     build: ./User-Service
     ports:
@@ -12,7 +23,7 @@ services:
   admin-service:
     build: ./Admin-Service
     ports:
-      - "5002:5002"
+      - "5003:5003"
     networks:
       - connectify-net
     depends_on:
@@ -21,7 +32,7 @@ services:
   auth-service:
     build: ./Auth-Service
     ports:
-      - "5003:5003"
+      - "5002:5002"
     networks:
       - connectify-net
     depends_on:

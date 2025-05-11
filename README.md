@@ -1,5 +1,7 @@
 # 📱 Connectify
 
+important -- Currently Working on Docker for using microservice
+
 A full-stack social media application where users can register, log in, follow others, post content, like/comment on posts, and receive email notifications for key actions like registration and account deletion.
 
 ---
@@ -87,8 +89,9 @@ EMAIL=your_gmail_email
 
 ## 🚀 Author
 
-**Mujtaba Ali**
-*BS Software Engineering @ FAST NUCES*
+**Mujtaba Ali 22f-3650**
+**Muhammad Omair 22f-3651**
+**Sarmad Mehmood 22f-3695**
 
 ---
 
